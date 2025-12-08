@@ -17,14 +17,14 @@
       const char = line[i];
 
       if (char === '"') {
-        // Toggle inQuotes, but ignore escaped quotes ("")
+        // Toggle inQuotes, but ignore escaped quotes
         if (inQuotes && line[i + 1] === '"') {
           current += '"';
-          i++; // skip escaped quote
+          i++; // skip the escaped quote
         } else {
           inQuotes = !inQuotes;
         }
-      } else if (char === "," && !inQuotes) {
+      } else if (char === ',' && !inQuotes) {
         result.push(current);
         current = "";
       } else {
@@ -39,67 +39,55 @@
     const res = await fetch(CSV_URL);
     const text = await res.text();
 
-    const lines = text.trim().split(/\r?\n/);
+    const lines = text.trim().split("\n");
     if (lines.length <= 1) return [];
 
-    // Header row
-    const headerCols = parseCSVLine(lines[0]).map(h => h.trim().toLowerCase());
+    const dataLines = lines.slice(1); // skip header
 
-    function colIndex(name) {
-      return headerCols.indexOf(name.toLowerCase());
-    }
-
-    const idxMemberId          = colIndex("member_id");
-    const idxFullName          = colIndex("full_name");
-    const idxCategory          = colIndex("membership_category");
-    const idxSavings           = colIndex("total_savings");
-    const idxShareCapital      = colIndex("total_share_capital");
-    const idxLoanBalance       = colIndex("loan_balance");
-    const idxLoanEligStatus    = colIndex("loan_eligibility_status");
-    const idxLoanAppStatus     = colIndex("loan_application_status");
-    const idxLoanAmountElig    = colIndex("loan_amount_eligible");
-    const idxRepayDefaultDays  = colIndex("repayment_default_days");
-    const idxPassword          = colIndex("password");
-    const idxLastUpdated       = colIndex("last_updated");
-
-    const dataLines = lines.slice(1);
-
+    // Expected column order:
+    // 0: member_id
+    // 1: full_name
+    // 2: membership_category
+    // 3: total_savings
+    // 4: total_share_capital
+    // 5: loan_balance
+    // 6: loan_eligibility_status
+    // 7: loan_application_status
+    // 8: loan_amount_eligible
+    // 9: repayment_default_days
+    // 10: password
+    // 11: last_updated
     return dataLines.map(line => {
       const cols = parseCSVLine(line);
-      function get(i) {
-        return (i >= 0 && i < cols.length ? cols[i] : "").trim();
-      }
       return {
-        member_id:              get(idxMemberId),
-        full_name:              get(idxFullName),
-        membership_category:    get(idxCategory),
-        total_savings:          get(idxSavings),
-        total_share_capital:    get(idxShareCapital),
-        loan_balance:           get(idxLoanBalance),
-        loan_eligibility_status:get(idxLoanEligStatus),
-        loan_application_status:get(idxLoanAppStatus),
-        loan_amount_eligible:   get(idxLoanAmountElig),
-        repayment_default_days: get(idxRepayDefaultDays),
-        password:               get(idxPassword),
-        last_updated:           get(idxLastUpdated)
+        member_id: (cols[0] || "").trim(),
+        full_name: (cols[1] || "").trim(),
+        membership_category: (cols[2] || "").trim(),
+        total_savings: (cols[3] || "").trim(),
+        total_share_capital: (cols[4] || "").trim(),
+        loan_balance: (cols[5] || "").trim(),
+        loan_eligibility_status: (cols[6] || "").trim(),
+        loan_application_status: (cols[7] || "").trim(),
+        loan_amount_eligible: (cols[8] || "").trim(),
+        repayment_default_days: (cols[9] || "").trim(),
+        password: (cols[10] || "").trim(),
+        last_updated: (cols[11] || "").trim()
       };
     });
   }
 
-  async function handleView(event) {
-    if (event && event.preventDefault) event.preventDefault();
-
+  async function handleView() {
     const memberInput = document.getElementById("memberId");
-    const passInput   = document.getElementById("password");
-    const errorEl     = document.getElementById("error");
-    const result      = document.getElementById("result");
-    const viewBtn     = document.getElementById("viewBtn");
+    const passInput = document.getElementById("password");
+    const errorEl = document.getElementById("error");
+    const result = document.getElementById("result");
+    const viewBtn = document.getElementById("viewBtn");
 
     errorEl.textContent = "";
     result.style.display = "none";
 
     const memberId = (memberInput.value || "").trim();
-    const password = (passInput.value   || "").trim();
+    const password = (passInput.value || "").trim();
 
     if (!memberId || !password) {
       errorEl.textContent = "Please enter both Membership ID and Password.";
@@ -112,12 +100,12 @@
     try {
       const rows = await fetchDashboardRows();
 
-      const idNorm   = memberId.toLowerCase();
+      const idNorm = memberId.toLowerCase();
       const passNorm = password; // password is case-sensitive
 
       const match = rows.find(r =>
-        (r.member_id || "").toLowerCase() === idNorm &&
-        (r.password  || "") === passNorm
+        r.member_id.toLowerCase() === idNorm &&
+        r.password === passNorm
       );
 
       if (!match) {
@@ -126,32 +114,27 @@
       }
 
       // Fill profile info
-      document.getElementById("name").textContent       = match.full_name || "";
-      document.getElementById("category").textContent   = match.membership_category || "";
-      document.getElementById("idDisplay").textContent  = match.member_id || "";
+      document.getElementById("name").textContent = match.full_name || "";
+      document.getElementById("category").textContent = match.membership_category || "";
+      document.getElementById("idDisplay").textContent = match.member_id || "";
 
       // Money fields
-      document.getElementById("savings").textContent       = formatNaira(match.total_savings);
-      document.getElementById("shareCapital").textContent  = formatNaira(match.total_share_capital);
-      document.getElementById("loanBalance").textContent   = formatNaira(match.loan_balance);
-      document.getElementById("loanEligible").textContent  = formatNaira(match.loan_amount_eligible);
+      document.getElementById("savings").textContent = formatNaira(match.total_savings);
+      document.getElementById("shareCapital").textContent = formatNaira(match.total_share_capital);
+      document.getElementById("loanBalance").textContent = formatNaira(match.loan_balance);
+      document.getElementById("loanEligible").textContent = formatNaira(match.loan_amount_eligible);
 
       // Status fields
-      document.getElementById("loanEligibilityStatus").textContent =
-        match.loan_eligibility_status || "N/A";
-
-      document.getElementById("loanApplicationStatus").textContent =
-        match.loan_application_status || "N/A";
+      document.getElementById("loanEligibilityStatus").textContent = match.loan_eligibility_status || "N/A";
+      document.getElementById("loanApplicationStatus").textContent = match.loan_application_status || "N/A";
 
       // Default days
-      const defaultDaysRaw =
-        (match.repayment_default_days || "").replace(/[^0-9.\-]/g, "");
+      const defaultDaysRaw = (match.repayment_default_days || "").replace(/[^0-9.\-]/g, "");
       const defaultDays = Number(defaultDaysRaw || "0");
       document.getElementById("repaymentDefaultDays").textContent = defaultDays;
 
       // Last updated
-      document.getElementById("lastUpdated").textContent =
-        match.last_updated || "Contact Secretariat";
+      document.getElementById("lastUpdated").textContent = match.last_updated || "Contact Secretariat";
 
       result.style.display = "block";
     } catch (e) {
@@ -165,23 +148,17 @@
 
   function handleLogout() {
     const memberInput = document.getElementById("memberId");
-    const passInput   = document.getElementById("password");
-    const result      = document.getElementById("result");
-    const errorEl     = document.getElementById("error");
+    const passInput = document.getElementById("password");
+    const result = document.getElementById("result");
+    const errorEl = document.getElementById("error");
 
     memberInput.value = "";
-    passInput.value   = "";
+    passInput.value = "";
     result.style.display = "none";
     errorEl.textContent = "";
     memberInput.focus();
   }
 
-  // Ensure elements exist before binding
-  window.addEventListener("DOMContentLoaded", () => {
-    const viewBtn   = document.getElementById("viewBtn");
-    const logoutBtn = document.getElementById("logoutBtn");
-
-    if (viewBtn)   viewBtn.addEventListener("click", handleView);
-    if (logoutBtn) logoutBtn.addEventListener("click", handleLogout);
-  });
+  document.getElementById("viewBtn").addEventListener("click", handleView);
+  document.getElementById("logoutBtn").addEventListener("click", handleLogout);
 </script>
