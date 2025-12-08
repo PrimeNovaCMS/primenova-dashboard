@@ -1,13 +1,13 @@
 <script>
   // 🔗 Put your published Dashboard CSV link here
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRr9k9ClkLjP2X6qaZxsjEWVgBAWWKFS5g5gFmwtN9-nP-NUEYMtWhRiu7Qm4uyweot1-GQm43JYqy0/pubhtml?gid=1139815476&single=true";
+  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRr9k9ClkLjP2X6qaZxsjEWVgBAWWKFS5g5gFmwtN9-nP-NUEYMtWhRiu7Qm4uyweot1-GQm43JYqy0/pub?gid=1139815476&single=true&output=csv";
 
   function formatNaira(value) {
     const n = Number((value || "0").replace(/[^0-9.\-]/g, ""));
     return "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 2 });
   }
 
-  // ✅ Robust CSV parser that handles commas inside quoted values
+  // Simple robust CSV parser (handles commas inside quotes)
   function parseCSVLine(line) {
     const result = [];
     let current = "";
@@ -44,7 +44,7 @@
 
     const dataLines = lines.slice(1); // skip header
 
-    // ✅ Expected column order:
+    // Expected column order:
     // 0: member_id
     // 1: full_name
     // 2: membership_category
@@ -55,7 +55,7 @@
     // 7: loan_application_status
     // 8: loan_amount_eligible
     // 9: repayment_default_days
-    // 10: password
+    // 10: password (not used for now)
     // 11: last_updated
     return dataLines.map(line => {
       const cols = parseCSVLine(line);
@@ -70,7 +70,6 @@
         loan_application_status: (cols[7] || "").trim(),
         loan_amount_eligible: (cols[8] || "").trim(),
         repayment_default_days: (cols[9] || "").trim(),
-        password: (cols[10] || "").trim(),
         last_updated: (cols[11] || "").trim()
       };
     });
@@ -78,7 +77,6 @@
 
   async function handleView() {
     const memberInput = document.getElementById("memberId");
-    const passInput = document.getElementById("password");
     const errorEl = document.getElementById("error");
     const result = document.getElementById("result");
     const viewBtn = document.getElementById("viewBtn");
@@ -87,10 +85,8 @@
     result.style.display = "none";
 
     const memberId = (memberInput.value || "").trim();
-    const password = (passInput.value || "").trim();
-
-    if (!memberId || !password) {
-      errorEl.textContent = "Please enter both Membership ID and Password.";
+    if (!memberId) {
+      errorEl.textContent = "Please enter your Membership ID.";
       return;
     }
 
@@ -101,15 +97,13 @@
       const rows = await fetchDashboardRows();
 
       const idNorm = memberId.toLowerCase();
-      const passNorm = password; // password is case-sensitive
 
       const match = rows.find(r =>
-        r.member_id.toLowerCase() === idNorm &&
-        r.password === passNorm
+        r.member_id.toLowerCase() === idNorm
       );
 
       if (!match) {
-        errorEl.textContent = "Invalid Membership ID or Password.";
+        errorEl.textContent = "No record found for this Membership ID.";
         return;
       }
 
@@ -124,20 +118,20 @@
       document.getElementById("loanBalance").textContent = formatNaira(match.loan_balance);
       document.getElementById("loanEligible").textContent = formatNaira(match.loan_amount_eligible);
 
-      // ✅ Loan Status
+      // ✅ Status
       document.getElementById("loanEligibilityStatus").textContent =
         match.loan_eligibility_status || "N/A";
 
       document.getElementById("loanApplicationStatus").textContent =
         match.loan_application_status || "N/A";
 
-      // ✅ Repayment Default
+      // ✅ Default days
       const defaultDaysRaw =
         (match.repayment_default_days || "").replace(/[^0-9.\-]/g, "");
       const defaultDays = Number(defaultDaysRaw || "0");
       document.getElementById("repaymentDefaultDays").textContent = defaultDays;
 
-      // ✅ Last Updated
+      // ✅ Last updated
       document.getElementById("lastUpdated").textContent =
         match.last_updated || "Contact Secretariat";
 
