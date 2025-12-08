@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Prime Nova Member Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -79,12 +80,14 @@
     .small {
       font-size: 0.8rem;
       color: #666;
-      margin-top: 4px;
+      margin-top: 10px;
       text-align: center;
     }
   </style>
 </head>
+
 <body>
+
   <h1>Prime Nova Member Dashboard</h1>
 
   <div class="card">
@@ -118,33 +121,36 @@
   </div>
 
   <p class="small">
-    Data provided by Prime Nova Cooperative. Contact the office if any of your details are incorrect.
+    Data provided by Prime Nova (Alimosho) Cooperative Multipurpose Society.
   </p>
 
   <script>
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRr9k9ClkLjP2X6qaZxsjEWVgBAWWKFS5g5gFmwtN9-nP-NUEYMtWhRiu7Qm4uyweot1-GQm43JYqy0/pubhtml";
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRr9k9ClkLjP2X6qaZxsjEWVgBAWWKFS5g5gFmwtN9-nP-NUEYMtWhRiu7Qm4uyweot1-GQm43JYqy0/pub?gid=1139815476&single=true&output=csv";
 
     function formatNaira(value) {
-      const n = Number(value || 0);
+      const n = Number((value || "0").replace(/[^0-9.\-]/g, ""));
       return "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 2 });
     }
 
-    async function fetchDashboard() {
+    async function fetchDashboardRows() {
       const res = await fetch(CSV_URL);
       const text = await res.text();
-      return text;
-    }
 
-    function parseCSV(text) {
       const lines = text.trim().split("\n");
-      const headers = lines[0].split(",").map(h => h.trim());
-      return lines.slice(1).map(line => {
+      if (lines.length <= 1) return [];
+
+      const dataLines = lines.slice(1);
+
+      return dataLines.map(line => {
         const cols = line.split(",");
-        const row = {};
-        headers.forEach((h, i) => {
-          row[h] = (cols[i] || "").trim();
-        });
-        return row;
+        return {
+          member_id: (cols[0] || "").trim(),
+          full_name: (cols[1] || "").trim(),
+          membership_category: (cols[2] || "").trim(),
+          total_savings: (cols[3] || "").trim(),
+          total_share_capital: (cols[4] || "").trim(),
+          loan_balance: (cols[5] || "").trim(),
+        };
       });
     }
 
@@ -167,11 +173,10 @@
       btn.textContent = "Loading...";
 
       try {
-        const csvText = await fetchDashboard();
-        const rows = parseCSV(csvText);
+        const rows = await fetchDashboardRows();
 
-        const match = rows.find(r => 
-          (r.member_id || "").toLowerCase() === memberId.toLowerCase()
+        const match = rows.find(r =>
+          r.member_id.toLowerCase() === memberId.toLowerCase()
         );
 
         if (!match) {
@@ -200,5 +205,6 @@
 
     document.getElementById("viewBtn").addEventListener("click", handleView);
   </script>
+
 </body>
 </html>
