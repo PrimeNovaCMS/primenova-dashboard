@@ -1,169 +1,367 @@
-<script>
-  // 🔗 Put your published Dashboard CSV link here
-  const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRr9k9ClkLjP2X6qaZxsjEWVgBAWWKFS5g5gFmwtN9-nP-NUEYMtWhRiu7Qm4uyweot1-GQm43JYqy0/pub?gid=1139815476&single=true&output=csv";
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Prime Nova Member Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  function formatNaira(value) {
-    const n = Number((value || "0").replace(/[^0-9.\-]/g, ""));
-    return "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 2 });
-  }
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 16px;
+      max-width: 480px;
+      margin: 0 auto;
+      background: #f3f3f3;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .logo {
+      width: 70px;
+      height: 70px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+      object-fit: cover;
+      border: 2px solid #0c5b3b44;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin: 0;
+      color: #0c5b3b;
+    }
+    h2 {
+      font-size: 0.85rem;
+      margin-top: 2px;
+      margin-bottom: 14px;
+      color: #888;
+      font-weight: 400;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+    }
+    label {
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+      display: block;
+      color: #444;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #0c5b3b, #1b8a5f);
+      color: white;
+      cursor: pointer;
+    }
+    #logoutBtn {
+      background: #b00020;
+      width: auto;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      margin-bottom: 10px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .summary-item {
+      background: #0c5b3b;
+      color: white;
+      border-radius: 12px;
+      padding: 10px;
+      text-align: center;
+      font-size: 0.8rem;
+    }
+    .summary-item span {
+      display: block;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-top: 4px;
+      color: #f7e6b5;
+    }
+    .status-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .status-card {
+      background: white;
+      padding: 10px;
+      border-radius: 12px;
+      border-left: 4px solid #0c5b3b;
+      font-size: 0.8rem;
+    }
+    .status-card.danger {
+      border-left-color: #b00020;
+      background: #fdecee;
+    }
+    .status-card span {
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+    .last-updated {
+      text-align: right;
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 6px;
+    }
+    .error {
+      color: #b00020;
+      font-size: 0.85rem;
+      margin-top: 6px;
+    }
+    .small {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 10px;
+    }
+  </style>
+</head>
 
-  // ✅ Robust CSV parser that handles commas inside quoted values
-  function parseCSVLine(line) {
-    const result = [];
-    let current = "";
-    let inQuotes = false;
+<body>
+  <div class="header">
+    <!-- If you have a logo URL, replace LOGO_URL_HERE. If not, leave as-is. -->
+    <img src="LOGO_URL_HERE" class="logo" onerror="this.style.display='none'">
+    <h1>Prime Nova Dashboard</h1>
+    <h2>Progress Through Partnership</h2>
+  </div>
 
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
+  <div class="card">
+    <label for="memberId">Membership ID</label>
+    <input id="memberId" placeholder="PN-0001" />
 
-      if (char === '"') {
-        if (inQuotes && line[i + 1] === '"') {
-          current += '"';
-          i++;
+    <label for="password">Password</label>
+    <input id="password" type="password" placeholder="Your password" />
+
+    <button id="viewBtn">View My Summary</button>
+    <div id="error" class="error"></div>
+  </div>
+
+  <div id="result" style="display:none">
+    <div class="card">
+      <button id="logoutBtn">Logout</button>
+      <p><b>Name:</b> <span id="name"></span></p>
+      <p><b>Category:</b> <span id="category"></span></p>
+      <p><b>Member ID:</b> <span id="idDisplay"></span></p>
+      <p class="last-updated">Last Updated: <span id="lastUpdated"></span></p>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-item">Savings <span id="savings"></span></div>
+      <div class="summary-item">Share Capital <span id="shareCapital"></span></div>
+      <div class="summary-item">Loan Eligible <span id="loanEligible"></span></div>
+      <div class="summary-item">Loan Balance <span id="loanBalance"></span></div>
+    </div>
+
+    <div class="status-row">
+      <div class="status-card">
+        Loan Eligibility Status
+        <span id="loanEligibilityStatus"></span>
+      </div>
+      <div class="status-card">
+        Loan Application Status
+        <span id="loanApplicationStatus"></span>
+      </div>
+      <div class="status-card danger">
+        Repayment Default (Days)
+        <span id="repaymentDefaultDays"></span>
+      </div>
+    </div>
+  </div>
+
+  <p class="small">
+    Prime Nova (Alimosho) Cooperative Multipurpose Society<br />
+    Contact the Secretariat if any detail is incorrect.
+  </p>
+
+  <script>
+    // 🔗 Your published Dashboard CSV link (already set from your working script)
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRr9k9ClkLjP2X6qaZxsjEWVgBAWWKFS5g5gFmwtN9-nP-NUEYMtWhRiu7Qm4uyweot1-GQm43JYqy0/pub?gid=1139815476&single=true&output=csv";
+
+    function formatNaira(value) {
+      const n = Number((value || "0").replace(/[^0-9.\-]/g, ""));
+      return "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 2 });
+    }
+
+    // ✅ Robust CSV parser that handles commas inside quoted values
+    function parseCSVLine(line) {
+      const result = [];
+      let current = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"') {
+          if (inQuotes && line[i + 1] === '"') {
+            current += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (char === "," && !inQuotes) {
+          result.push(current);
+          current = "";
         } else {
-          inQuotes = !inQuotes;
+          current += char;
         }
-      } else if (char === "," && !inQuotes) {
-        result.push(current);
-        current = "";
-      } else {
-        current += char;
       }
+
+      result.push(current);
+      return result;
     }
 
-    result.push(current);
-    return result;
-  }
+    async function fetchDashboardRows() {
+      const res = await fetch(CSV_URL);
+      const text = await res.text();
 
-  async function fetchDashboardRows() {
-    const res = await fetch(CSV_URL);
-    const text = await res.text();
+      const lines = text.trim().split("\n");
+      if (lines.length <= 1) return [];
 
-    const lines = text.trim().split("\n");
-    if (lines.length <= 1) return [];
+      const dataLines = lines.slice(1); // skip header
 
-    const dataLines = lines.slice(1); // skip header
-
-    // ✅ Expected column order:
-    // 0: member_id
-    // 1: full_name
-    // 2: membership_category
-    // 3: total_savings
-    // 4: total_share_capital
-    // 5: loan_balance
-    // 6: loan_eligibility_status
-    // 7: loan_application_status
-    // 8: loan_amount_eligible
-    // 9: repayment_default_days
-    // 10: password
-    // 11: last_updated
-    return dataLines.map(line => {
-      const cols = parseCSVLine(line);
-      return {
-        member_id: (cols[0] || "").trim(),
-        full_name: (cols[1] || "").trim(),
-        membership_category: (cols[2] || "").trim(),
-        total_savings: (cols[3] || "").trim(),
-        total_share_capital: (cols[4] || "").trim(),
-        loan_balance: (cols[5] || "").trim(),
-        loan_eligibility_status: (cols[6] || "").trim(),
-        loan_application_status: (cols[7] || "").trim(),
-        loan_amount_eligible: (cols[8] || "").trim(),
-        repayment_default_days: (cols[9] || "").trim(),
-        password: (cols[10] || "").trim(),
-        last_updated: (cols[11] || "").trim()
-      };
-    });
-  }
-
-  async function handleView() {
-    const memberInput = document.getElementById("memberId");
-    const passInput = document.getElementById("password");
-    const errorEl = document.getElementById("error");
-    const result = document.getElementById("result");
-    const viewBtn = document.getElementById("viewBtn");
-
-    errorEl.textContent = "";
-    result.style.display = "none";
-
-    const memberId = (memberInput.value || "").trim();
-    const password = (passInput.value || "").trim();
-
-    if (!memberId || !password) {
-      errorEl.textContent = "Please enter both Membership ID and Password.";
-      return;
+      // ✅ Expected column order:
+      // 0: member_id
+      // 1: full_name
+      // 2: membership_category
+      // 3: total_savings
+      // 4: total_share_capital
+      // 5: loan_balance
+      // 6: loan_eligibility_status
+      // 7: loan_application_status
+      // 8: loan_amount_eligible
+      // 9: repayment_default_days
+      // 10: password
+      // 11: last_updated
+      return dataLines.map(line => {
+        const cols = parseCSVLine(line);
+        return {
+          member_id: (cols[0] || "").trim(),
+          full_name: (cols[1] || "").trim(),
+          membership_category: (cols[2] || "").trim(),
+          total_savings: (cols[3] || "").trim(),
+          total_share_capital: (cols[4] || "").trim(),
+          loan_balance: (cols[5] || "").trim(),
+          loan_eligibility_status: (cols[6] || "").trim(),
+          loan_application_status: (cols[7] || "").trim(),
+          loan_amount_eligible: (cols[8] || "").trim(),
+          repayment_default_days: (cols[9] || "").trim(),
+          password: (cols[10] || "").trim(),
+          last_updated: (cols[11] || "").trim()
+        };
+      });
     }
 
-    viewBtn.disabled = true;
-    viewBtn.textContent = "Loading...";
+    async function handleView() {
+      const memberInput = document.getElementById("memberId");
+      const passInput = document.getElementById("password");
+      const errorEl = document.getElementById("error");
+      const result = document.getElementById("result");
+      const viewBtn = document.getElementById("viewBtn");
 
-    try {
-      const rows = await fetchDashboardRows();
+      errorEl.textContent = "";
+      result.style.display = "none";
 
-      const idNorm = memberId.toLowerCase();
-      const passNorm = password; // password is case-sensitive
+      const memberId = (memberInput.value || "").trim();
+      const password = (passInput.value || "").trim();
 
-      const match = rows.find(r =>
-        r.member_id.toLowerCase() === idNorm &&
-        r.password === passNorm
-      );
-
-      if (!match) {
-        errorEl.textContent = "Invalid Membership ID or Password.";
+      if (!memberId || !password) {
+        errorEl.textContent = "Please enter both Membership ID and Password.";
         return;
       }
 
-      // ✅ Basic Info
-      document.getElementById("name").textContent = match.full_name || "";
-      document.getElementById("category").textContent = match.membership_category || "";
-      document.getElementById("idDisplay").textContent = match.member_id || "";
+      viewBtn.disabled = true;
+      viewBtn.textContent = "Loading...";
 
-      // ✅ Financials
-      document.getElementById("savings").textContent = formatNaira(match.total_savings);
-      document.getElementById("shareCapital").textContent = formatNaira(match.total_share_capital);
-      document.getElementById("loanBalance").textContent = formatNaira(match.loan_balance);
-      document.getElementById("loanEligible").textContent = formatNaira(match.loan_amount_eligible);
+      try {
+        const rows = await fetchDashboardRows();
 
-      // ✅ Loan Status
-      document.getElementById("loanEligibilityStatus").textContent =
-        match.loan_eligibility_status || "N/A";
+        const idNorm = memberId.toLowerCase();
+        const passNorm = password; // password is case-sensitive
 
-      document.getElementById("loanApplicationStatus").textContent =
-        match.loan_application_status || "N/A";
+        const match = rows.find(r =>
+          r.member_id.toLowerCase() === idNorm &&
+          r.password === passNorm
+        );
 
-      // ✅ Repayment Default
-      const defaultDaysRaw =
-        (match.repayment_default_days || "").replace(/[^0-9.\-]/g, "");
-      const defaultDays = Number(defaultDaysRaw || "0");
-      document.getElementById("repaymentDefaultDays").textContent = defaultDays;
+        if (!match) {
+          errorEl.textContent = "Invalid Membership ID or Password.";
+          return;
+        }
 
-      // ✅ Last Updated
-      document.getElementById("lastUpdated").textContent =
-        match.last_updated || "Contact Secretariat";
+        // ✅ Basic Info
+        document.getElementById("name").textContent = match.full_name || "";
+        document.getElementById("category").textContent = match.membership_category || "";
+        document.getElementById("idDisplay").textContent = match.member_id || "";
 
-      result.style.display = "block";
-    } catch (e) {
-      console.error(e);
-      errorEl.textContent = "Error loading data. Please try again later.";
-    } finally {
-      viewBtn.disabled = false;
-      viewBtn.textContent = "View My Summary";
+        // ✅ Financials
+        document.getElementById("savings").textContent = formatNaira(match.total_savings);
+        document.getElementById("shareCapital").textContent = formatNaira(match.total_share_capital);
+        document.getElementById("loanBalance").textContent = formatNaira(match.loan_balance);
+        document.getElementById("loanEligible").textContent = formatNaira(match.loan_amount_eligible);
+
+        // ✅ Loan Status
+        document.getElementById("loanEligibilityStatus").textContent =
+          match.loan_eligibility_status || "N/A";
+
+        document.getElementById("loanApplicationStatus").textContent =
+          match.loan_application_status || "N/A";
+
+        // ✅ Repayment Default
+        const defaultDaysRaw =
+          (match.repayment_default_days || "").replace(/[^0-9.\-]/g, "");
+        const defaultDays = Number(defaultDaysRaw || "0");
+        document.getElementById("repaymentDefaultDays").textContent = defaultDays;
+
+        // ✅ Last Updated
+        document.getElementById("lastUpdated").textContent =
+          match.last_updated || "Contact Secretariat";
+
+        result.style.display = "block";
+      } catch (e) {
+        console.error(e);
+        errorEl.textContent = "Error loading data. Please try again later.";
+      } finally {
+        viewBtn.disabled = false;
+        viewBtn.textContent = "View My Summary";
+      }
     }
-  }
 
-  function handleLogout() {
-    const memberInput = document.getElementById("memberId");
-    const passInput = document.getElementById("password");
-    const result = document.getElementById("result");
-    const errorEl = document.getElementById("error");
+    function handleLogout() {
+      const memberInput = document.getElementById("memberId");
+      const passInput = document.getElementById("password");
+      const result = document.getElementById("result");
+      const errorEl = document.getElementById("error");
 
-    memberInput.value = "";
-    passInput.value = "";
-    result.style.display = "none";
-    errorEl.textContent = "";
-    memberInput.focus();
-  }
+      memberInput.value = "";
+      passInput.value = "";
+      result.style.display = "none";
+      errorEl.textContent = "";
+      memberInput.focus();
+    }
 
-  document.getElementById("viewBtn").addEventListener("click", handleView);
-  document.getElementById("logoutBtn").addEventListener("click", handleLogout);
-</script>
+    document.getElementById("viewBtn").addEventListener("click", handleView);
+    document.getElementById("logoutBtn").addEventListener("click", handleLogout);
+  </script>
+</body>
+</html>
