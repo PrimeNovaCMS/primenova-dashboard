@@ -7,7 +7,7 @@
     return "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 2 });
   }
 
-  // Robust CSV line parser that handles commas inside quoted fields
+  // ✅ Robust CSV parser that handles commas inside quoted values
   function parseCSVLine(line) {
     const result = [];
     let current = "";
@@ -17,20 +17,20 @@
       const char = line[i];
 
       if (char === '"') {
-        // Toggle inQuotes, but ignore escaped quotes
         if (inQuotes && line[i + 1] === '"') {
           current += '"';
-          i++; // skip the escaped quote
+          i++;
         } else {
           inQuotes = !inQuotes;
         }
-      } else if (char === ',' && !inQuotes) {
+      } else if (char === "," && !inQuotes) {
         result.push(current);
         current = "";
       } else {
         current += char;
       }
     }
+
     result.push(current);
     return result;
   }
@@ -44,7 +44,7 @@
 
     const dataLines = lines.slice(1); // skip header
 
-    // Expected column order:
+    // ✅ Expected column order:
     // 0: member_id
     // 1: full_name
     // 2: membership_category
@@ -113,28 +113,33 @@
         return;
       }
 
-      // Fill profile info
+      // ✅ Basic Info
       document.getElementById("name").textContent = match.full_name || "";
       document.getElementById("category").textContent = match.membership_category || "";
       document.getElementById("idDisplay").textContent = match.member_id || "";
 
-      // Money fields
+      // ✅ Financials
       document.getElementById("savings").textContent = formatNaira(match.total_savings);
       document.getElementById("shareCapital").textContent = formatNaira(match.total_share_capital);
       document.getElementById("loanBalance").textContent = formatNaira(match.loan_balance);
       document.getElementById("loanEligible").textContent = formatNaira(match.loan_amount_eligible);
 
-      // Status fields
-      document.getElementById("loanEligibilityStatus").textContent = match.loan_eligibility_status || "N/A";
-      document.getElementById("loanApplicationStatus").textContent = match.loan_application_status || "N/A";
+      // ✅ Loan Status
+      document.getElementById("loanEligibilityStatus").textContent =
+        match.loan_eligibility_status || "N/A";
 
-      // Default days
-      const defaultDaysRaw = (match.repayment_default_days || "").replace(/[^0-9.\-]/g, "");
+      document.getElementById("loanApplicationStatus").textContent =
+        match.loan_application_status || "N/A";
+
+      // ✅ Repayment Default
+      const defaultDaysRaw =
+        (match.repayment_default_days || "").replace(/[^0-9.\-]/g, "");
       const defaultDays = Number(defaultDaysRaw || "0");
       document.getElementById("repaymentDefaultDays").textContent = defaultDays;
 
-      // Last updated
-      document.getElementById("lastUpdated").textContent = match.last_updated || "Contact Secretariat";
+      // ✅ Last Updated
+      document.getElementById("lastUpdated").textContent =
+        match.last_updated || "Contact Secretariat";
 
       result.style.display = "block";
     } catch (e) {
@@ -162,4 +167,3 @@
   document.getElementById("viewBtn").addEventListener("click", handleView);
   document.getElementById("logoutBtn").addEventListener("click", handleLogout);
 </script>
-
