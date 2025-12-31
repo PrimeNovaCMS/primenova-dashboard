@@ -139,48 +139,7 @@
       font-size: 0.75rem;
       color: #666;
       margin-top: 10px;
-      /* ===== Premium Enhancements (A+B) ===== */
-.welcome {
-  font-size: 0.9rem;
-  color: #444;
-  margin-bottom: 8px;
-}
-
-.badge {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-.badge.good {
-  background: #e6f4ef;
-  color: #0c5b3b;
-}
-
-.badge.warn {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.badge.danger {
-  background: #fdecee;
-  color: #b00020;
-}
-
-.progress {
-  background: #eee;
-  border-radius: 999px;
-  height: 6px;
-  margin-top: 6px;
-  overflow: hidden;
-}
-
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, #0c5b3b, #1b8a5f);
-}
+    }
   </style>
 </head>
 
@@ -206,65 +165,35 @@
   </div>
 
   <div id="result" style="display:none">
-      <div class="card">
-    <div class="welcome">Welcome 👋</div>
-    <strong id="name"></strong><br>
-    <span class="small">
-      ID: <span id="idDisplay"></span> •
-      <span id="category"></span>
-    </span>
-  </div>
+    <div class="card">
+      <button id="logoutBtn">Logout</button>
+      <p><b>Name:</b> <span id="name"></span></p>
+      <p><b>Category:</b> <span id="category"></span></p>
+      <p><b>Member ID:</b> <span id="idDisplay"></span></p>
+      <p class="last-updated">Last Updated: <span id="lastUpdated"></span></p>
+    </div>
 
-  <div class="card summary-grid">
-    <div class="summary-item">
-      Savings
-      <span id="savings"></span>
-      <div class="progress">
-        <div id="savingsBar" class="progress-bar"></div>
+    <div class="summary-grid">
+      <div class="summary-item">Savings <span id="savings"></span></div>
+      <div class="summary-item">Share Capital <span id="shareCapital"></span></div>
+      <div class="summary-item">Loan Eligible <span id="loanEligible"></span></div>
+      <div class="summary-item">Loan Balance <span id="loanBalance"></span></div>
+    </div>
+
+    <div class="status-row">
+      <div class="status-card">
+        Loan Eligibility Status
+        <span id="loanEligibilityStatus"></span>
+      </div>
+      <div class="status-card">
+        Loan Application Status
+        <span id="loanApplicationStatus"></span>
+      </div>
+      <div class="status-card danger">
+        Repayment Default (Days)
+        <span id="repaymentDefaultDays"></span>
       </div>
     </div>
-
-    <div class="summary-item">
-      Share Capital
-      <span id="shareCapital"></span>
-      <div class="progress">
-        <div id="shareBar" class="progress-bar"></div>
-      </div>
-    </div>
-
-    <div class="summary-item">
-      Loan Balance
-      <span id="loanBalance"></span>
-    </div>
-
-    <div class="summary-item">
-      Loan Eligible
-      <span id="loanEligible"></span>
-    </div>
-  </div>
-
-  <div class="card status-row">
-    <div class="status-card">
-      Loan Eligibility
-      <span id="loanEligibilityStatus"></span>
-    </div>
-    <div class="status-card">
-  Loan Application
-  <span id="loanApplicationStatus"></span>
-</div>
-
-    <div id="defaultCard" class="status-card">
-      Repayment Default
-      <span id="repaymentDefaultDays"></span> days
-    </div>
-  </div>
-
-  <div class="last-updated">
-    Last updated: <span id="lastUpdated"></span>
-  </div>
-
-  <button id="logoutBtn">Logout</button>
-
   </div>
 
   <p class="small">
@@ -443,10 +372,6 @@
   </script>
 </body>
 </html>
-
-
-
-
 
 
 
