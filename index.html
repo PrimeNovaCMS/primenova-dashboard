@@ -4,17 +4,19 @@
   <meta charset="UTF-8" />
   <title>Prime Nova Member Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0c5b3b">
 
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
+  <!-- PWA / APP ICON SETUP -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0c5b3b">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
 
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       padding: 16px;
-      max-width: 480px;
+      max-width: 520px;
       margin: 0 auto;
       background: #f3f3f3;
     }
@@ -44,7 +46,7 @@
     }
     .card {
       background: white;
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 14px 16px;
       margin-bottom: 12px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.06);
@@ -57,49 +59,48 @@
     }
     input {
       width: 100%;
-      padding: 8px;
-      border-radius: 8px;
+      padding: 10px;
+      border-radius: 10px;
       border: 1px solid #ccc;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       font-size: 0.95rem;
+      background: #fff;
     }
     button {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       border-radius: 999px;
       border: none;
       font-size: 0.95rem;
-      font-weight: 600;
+      font-weight: 700;
       background: linear-gradient(135deg, #0c5b3b, #1b8a5f);
       color: white;
       cursor: pointer;
     }
     #logoutBtn {
       background: #b00020;
-      width: auto;
-      padding: 6px 14px;
-      font-size: 0.8rem;
-      margin-bottom: 10px;
+      width: 100%;
+      margin-top: 10px;
     }
     .summary-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 10px;
-      margin-top: 8px;
+      margin-top: 10px;
     }
     .summary-item {
       background: #0c5b3b;
       color: white;
-      border-radius: 12px;
-      padding: 10px;
+      border-radius: 14px;
+      padding: 12px;
       text-align: center;
       font-size: 0.8rem;
     }
     .summary-item span {
       display: block;
       font-size: 1rem;
-      font-weight: 700;
-      margin-top: 4px;
+      font-weight: 800;
+      margin-top: 5px;
       color: #f7e6b5;
     }
     .status-row {
@@ -110,107 +111,164 @@
     }
     .status-card {
       background: white;
-      padding: 10px;
-      border-radius: 12px;
-      border-left: 4px solid #0c5b3b;
+      padding: 12px;
+      border-radius: 14px;
+      border-left: 5px solid #0c5b3b;
       font-size: 0.8rem;
+    }
+    .status-card span {
+      display: block;
+      font-weight: 800;
+      font-size: 0.95rem;
+      margin-top: 6px;
+      color: #111;
+    }
+    .status-card.good {
+      border-left-color: #0c5b3b;
+      background: #e6f4ef;
     }
     .status-card.danger {
       border-left-color: #b00020;
       background: #fdecee;
     }
-    .status-card span {
-      font-weight: bold;
-      font-size: 0.95rem;
-    }
     .last-updated {
       text-align: right;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       color: #666;
       margin-top: 6px;
     }
     .error {
       color: #b00020;
-      font-size: 0.85rem;
-      margin-top: 6px;
+      font-size: 0.9rem;
+      margin-top: 8px;
+      text-align: center;
+      font-weight: 600;
     }
     .small {
       text-align: center;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       color: #666;
       margin-top: 10px;
+    }
+
+    /* ===== Premium Enhancements (A+B) ===== */
+    .welcome {
+      font-size: 0.9rem;
+      color: #444;
+      margin-bottom: 6px;
+    }
+    .progress {
+      background: rgba(255,255,255,0.25);
+      border-radius: 999px;
+      height: 6px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f7e6b5, #ffffff);
     }
   </style>
 </head>
 
 <body>
   <div class="header">
-    <!-- If you have a logo URL, replace LOGO_URL_HERE. If not, leave as-is. -->
-<img src="Registered Members.png"
-     class="Registered Members"
-     style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #0c5b3b;">
-    <h1>Prime Nova Dashboard</h1>
-    <h2>Progress Through Partnership</h2>
+    <!-- Put any logo image URL you want here (optional). If it doesn't load, no crash. -->
+    <img class="logo" alt="Prime Nova Logo" src="icon-192.png" />
+    <h1>Prime Nova</h1>
+    <h2>Member Dashboard</h2>
   </div>
 
   <div class="card">
     <label for="memberId">Membership ID</label>
-    <input id="memberId" placeholder="PN-0001" />
+    <input id="memberId" placeholder="e.g. PN-0001" />
 
     <label for="password">Password</label>
-    <input id="password" type="password" placeholder="Your password" />
+    <input id="password" type="password" placeholder="Enter your password" />
 
     <button id="viewBtn">View My Summary</button>
     <div id="error" class="error"></div>
+    <div class="small">If you don’t have your ID/Password, contact the Secretariat.</div>
   </div>
 
   <div id="result" style="display:none">
     <div class="card">
+      <div class="welcome">Welcome 👋</div>
+      <strong id="name"></strong><br>
+      <div class="small">
+        ID: <span id="idDisplay"></span> • <span id="category"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="summary-grid">
+        <div class="summary-item">
+          Savings
+          <span id="savings"></span>
+          <div class="progress"><div id="savingsBar" class="progress-bar"></div></div>
+        </div>
+
+        <div class="summary-item">
+          Share Capital
+          <span id="shareCapital"></span>
+          <div class="progress"><div id="shareBar" class="progress-bar"></div></div>
+        </div>
+
+        <div class="summary-item">
+          Loan Balance
+          <span id="loanBalance"></span>
+        </div>
+
+        <div class="summary-item">
+          Loan Eligible
+          <span id="loanEligible"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="status-row">
+        <div class="status-card">
+          Loan Eligibility Status
+          <span id="loanEligibilityStatus"></span>
+        </div>
+
+        <div class="status-card">
+          Loan Application Status
+          <span id="loanApplicationStatus"></span>
+        </div>
+
+        <div id="defaultCard" class="status-card">
+          Repayment Default (Days)
+          <span><span id="repaymentDefaultDays"></span> days</span>
+        </div>
+
+        <div class="status-card">
+          Next Action
+          <span id="nextAction">—</span>
+        </div>
+      </div>
+
+      <div class="last-updated">
+        Last updated: <span id="lastUpdated"></span>
+      </div>
+
       <button id="logoutBtn">Logout</button>
-      <p><b>Name:</b> <span id="name"></span></p>
-      <p><b>Category:</b> <span id="category"></span></p>
-      <p><b>Member ID:</b> <span id="idDisplay"></span></p>
-      <p class="last-updated">Last Updated: <span id="lastUpdated"></span></p>
-    </div>
-
-    <div class="summary-grid">
-      <div class="summary-item">Savings <span id="savings"></span></div>
-      <div class="summary-item">Share Capital <span id="shareCapital"></span></div>
-      <div class="summary-item">Loan Eligible <span id="loanEligible"></span></div>
-      <div class="summary-item">Loan Balance <span id="loanBalance"></span></div>
-    </div>
-
-    <div class="status-row">
-      <div class="status-card">
-        Loan Eligibility Status
-        <span id="loanEligibilityStatus"></span>
-      </div>
-      <div class="status-card">
-        Loan Application Status
-        <span id="loanApplicationStatus"></span>
-      </div>
-      <div class="status-card danger">
-        Repayment Default (Days)
-        <span id="repaymentDefaultDays"></span>
-      </div>
     </div>
   </div>
 
-  <p class="small">
-    Prime Nova Cooperative Multipurpose Society<br />
-    Contact the Secretariat if any detail is incorrect.
-  </p>
-
   <script>
-    // 🔗 Your published Dashboard CSV link (already set from your working script)
-    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRr9k9ClkLjP2X6qaZxsjEWVgBAWWKFS5g5gFmwtN9-nP-NUEYMtWhRiu7Qm4uyweot1-GQm43JYqy0/pub?gid=1139815476&single=true&output=csv";
+    // ✅ Your published Dashboard CSV link
+    const CSV_URL =
+      "https://docs.google.com/spreadsheets/d/e/2PACX-1vRr9k9ClkLjP2X6qaZxsjEWVgBAWWKFS5g5gFmwtN9-nP-NUEYMtWhRiu7Qm4uyweot1-GQm43JYqy0/pub?gid=1139815476&single=true&output=csv";
 
     function formatNaira(value) {
-      const n = Number((value || "0").replace(/[^0-9.\-]/g, ""));
-      return "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 2 });
+      const n = Number(String(value || "0").replace(/[^0-9.\-]/g, "")) || 0;
+      return "₦" + n.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    // ✅ Robust CSV parser that handles commas inside quoted values
+    // Robust CSV parser that handles commas inside quoted fields
     function parseCSVLine(line) {
       const result = [];
       let current = "";
@@ -233,13 +291,13 @@
           current += char;
         }
       }
-
       result.push(current);
       return result;
     }
 
     async function fetchDashboardRows() {
-      const res = await fetch(CSV_URL);
+      const res = await fetch(CSV_URL, { cache: "no-store" });
+      if (!res.ok) throw new Error("CSV fetch failed: " + res.status);
       const text = await res.text();
 
       const lines = text.trim().split("\n");
@@ -247,19 +305,6 @@
 
       const dataLines = lines.slice(1); // skip header
 
-      // ✅ Expected column order:
-      // 0: member_id
-      // 1: full_name
-      // 2: membership_category
-      // 3: total_savings
-      // 4: total_share_capital
-      // 5: loan_balance
-      // 6: loan_eligibility_status
-      // 7: loan_application_status
-      // 8: loan_amount_eligible
-      // 9: repayment_default_days
-      // 10: password
-      // 11: last_updated
       return dataLines.map(line => {
         const cols = parseCSVLine(line);
         return {
@@ -277,6 +322,16 @@
           last_updated: (cols[11] || "").trim()
         };
       });
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
+
+    function setWidth(id, percent) {
+      const el = document.getElementById(id);
+      if (el) el.style.width = percent + "%";
     }
 
     async function handleView() {
@@ -304,11 +359,9 @@
         const rows = await fetchDashboardRows();
 
         const idNorm = memberId.toLowerCase();
-        const passNorm = password; // password is case-sensitive
-
         const match = rows.find(r =>
           r.member_id.toLowerCase() === idNorm &&
-          r.password === passNorm
+          r.password === password
         );
 
         if (!match) {
@@ -316,33 +369,55 @@
           return;
         }
 
-        // ✅ Basic Info
-        document.getElementById("name").textContent = match.full_name || "";
-        document.getElementById("category").textContent = match.membership_category || "";
-        document.getElementById("idDisplay").textContent = match.member_id || "";
+        // Basic info
+        setText("name", match.full_name || "");
+        setText("category", match.membership_category || "");
+        setText("idDisplay", match.member_id || "");
 
-        // ✅ Financials
-        document.getElementById("savings").textContent = formatNaira(match.total_savings);
-        document.getElementById("shareCapital").textContent = formatNaira(match.total_share_capital);
-        document.getElementById("loanBalance").textContent = formatNaira(match.loan_balance);
-        document.getElementById("loanEligible").textContent = formatNaira(match.loan_amount_eligible);
+        // Financials
+        setText("savings", formatNaira(match.total_savings));
+        setText("shareCapital", formatNaira(match.total_share_capital));
+        setText("loanBalance", formatNaira(match.loan_balance));
+        setText("loanEligible", formatNaira(match.loan_amount_eligible));
 
-        // ✅ Loan Status
-        document.getElementById("loanEligibilityStatus").textContent =
-          match.loan_eligibility_status || "N/A";
+        // Status fields
+        setText("loanEligibilityStatus", match.loan_eligibility_status || "N/A");
+        setText("loanApplicationStatus", match.loan_application_status || "N/A");
 
-        document.getElementById("loanApplicationStatus").textContent =
-          match.loan_application_status || "N/A";
-
-        // ✅ Repayment Default
-        const defaultDaysRaw =
-          (match.repayment_default_days || "").replace(/[^0-9.\-]/g, "");
+        // Default days
+        const defaultDaysRaw = String(match.repayment_default_days || "").replace(/[^0-9.\-]/g, "");
         const defaultDays = Number(defaultDaysRaw || "0");
-        document.getElementById("repaymentDefaultDays").textContent = defaultDays;
+        setText("repaymentDefaultDays", String(defaultDays));
 
-        // ✅ Last Updated
-        document.getElementById("lastUpdated").textContent =
-          match.last_updated || "Contact Secretariat";
+        const defaultCard = document.getElementById("defaultCard");
+        if (defaultCard) {
+          defaultCard.classList.remove("good", "danger");
+          if (defaultDays > 0) defaultCard.classList.add("danger");
+          else defaultCard.classList.add("good");
+        }
+
+        // Last updated
+        setText("lastUpdated", match.last_updated || "Contact Secretariat");
+
+        // Progress bars (targets can be adjusted anytime)
+        const savingsNum = Number(String(match.total_savings || "0").replace(/[^0-9]/g, "")) || 0;
+        const shareNum = Number(String(match.total_share_capital || "0").replace(/[^0-9]/g, "")) || 0;
+
+        // Simple progress targets (edit later as your policy evolves)
+        const savingsTarget = 500000;    // ₦500,000
+        const shareTarget = 1000000;     // ₦1,000,000
+
+        setWidth("savingsBar", Math.min(100, (savingsNum / savingsTarget) * 100));
+        setWidth("shareBar", Math.min(100, (shareNum / shareTarget) * 100));
+
+        // Next Action guidance (simple logic)
+        let next = "Keep saving consistently.";
+        const elig = (match.loan_eligibility_status || "").toLowerCase();
+        const app = (match.loan_application_status || "").toLowerCase();
+        if (defaultDays > 0) next = "Please contact Secretariat to regularize repayment.";
+        else if (elig.includes("eligible") && (!app || app.includes("n/a") || app.includes("none"))) next = "You may apply for a loan if needed.";
+        else if (app.includes("pending")) next = "Loan application is pending review.";
+        setText("nextAction", next);
 
         result.style.display = "block";
       } catch (e) {
@@ -372,14 +447,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
