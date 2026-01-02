@@ -404,44 +404,51 @@
       });
     }
 
-    async function loadGuarantorRequests(memberId, password) {
-      const box = document.getElementById("guarantorList");
-      if (!box) return;
+  async function loadGuarantorRequests(memberId, password) {
+  const box = document.getElementById("guarantorList");
+  if (!box) return;
 
-      box.textContent = "Loading requests...";
+  box.textContent = "Loading requests...";
 
-      try {
-        const data = await apiPost({ action:"getGuarantorRequests", member_id:memberId, password });
+  try {
+    const data = await apiPost({
+      action: "getGuarantorRequests",
+      member_id: memberId,
+      password
+    });
 
-        if (!data.ok) {
-          box.textContent = data.error ? ("Error: " + data.error) : "Error loading requests. Please try again.";
-          return;
-        }
-
-        if (!data.pending || data.pending.length === 0) {
-          box.textContent = "No pending requests.";
-          return;
-        }
-
-        box.innerHTML = data.pending.map(req => `
-          <div class="guar-item">
-            <div><strong>Borrower:</strong> ${req.borrower_name} (${req.borrower_member_id})</div>
-            <div><strong>Amount:</strong> ₦${Number(req.amount_requested).toLocaleString()}</div>
-            <div><strong>Tenure:</strong> ${req.tenure_months} month(s)</div>
-            <div><strong>Monthly:</strong> ₦${Number(req.monthly_repayment).toLocaleString()}</div>
-            <div class="row2">
-              <button class="btn-approve" onclick="decide('${req.application_id}','approve')">Approve</button>
-              <button class="btn-decline" onclick="decide('${req.application_id}','decline')">Decline</button>
-            </div>
-            <div id="msg-${req.application_id}" class="small left" style="margin-top:6px;"></div>
-          </div>
-        `).join("");
-
-      } catch (e) {
-        console.error(e);
-        box.textContent = "Error loading requests. Please try again.";
-      }
+    // Show actual backend errors
+    if (!data || data.ok !== true) {
+      const msg = (data && (data.error || data.message)) ? (data.error || data.message) : "Request blocked (likely redirect/CORS).";
+      box.textContent = "Error: " + msg;
+      return;
     }
+
+    if (!data.pending || data.pending.length === 0) {
+      box.textContent = "No pending requests.";
+      return;
+    }
+
+    box.innerHTML = data.pending.map(req => `
+      <div class="guar-item">
+        <div><strong>Borrower:</strong> ${req.borrower_name} (${req.borrower_member_id})</div>
+        <div><strong>Amount:</strong> ₦${Number(req.amount_requested).toLocaleString()}</div>
+        <div><strong>Tenure:</strong> ${req.tenure_months} month(s)</div>
+        <div><strong>Monthly:</strong> ₦${Number(req.monthly_repayment).toLocaleString()}</div>
+        <div class="row2">
+          <button class="btn-approve" onclick="decide('${req.application_id}','approve')">Approve</button>
+          <button class="btn-decline" onclick="decide('${req.application_id}','decline')">Decline</button>
+        </div>
+        <div id="msg-${req.application_id}" class="small left" style="margin-top:6px;"></div>
+      </div>
+    `).join("");
+
+  } catch (e) {
+    console.error(e);
+    box.textContent = "Error: Network blocked (redirect/CORS). Open browser console to see details.";
+  }
+}
+
 
     async function decide(appId, decision) {
       const msg = document.getElementById(`msg-${appId}`);
@@ -574,3 +581,4 @@
   </script>
 </body>
 </html>
+
