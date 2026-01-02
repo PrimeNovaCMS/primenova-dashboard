@@ -463,13 +463,20 @@
     }
 
     async function apiPost(payload) {
-      const res = await fetch(APPS_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type":"application/json" },
-        body: JSON.stringify(payload)
-      });
-      return res.json();
-    }
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    // IMPORTANT: no headers here (prevents CORS preflight)
+    body: JSON.stringify(payload)
+  });
+
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { ok: false, error: "Non-JSON response: " + text.slice(0, 200) };
+  }
+}
+
 
     function wireLoanUI() {
       const amt = document.getElementById("loanAmount");
@@ -735,3 +742,4 @@
   </script>
 </body>
 </html>
+
