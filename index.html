@@ -44,6 +44,11 @@
       color: #888;
       font-weight: 400;
     }
+    h3 {
+      margin: 0 0 10px;
+      color: #0c5b3b;
+      font-size: 1rem;
+    }
     .card {
       background: white;
       border-radius: 14px;
@@ -57,7 +62,7 @@
       display: block;
       color: #444;
     }
-    input {
+    input, select, textarea {
       width: 100%;
       padding: 10px;
       border-radius: 10px;
@@ -65,6 +70,11 @@
       margin-bottom: 10px;
       font-size: 0.95rem;
       background: #fff;
+      box-sizing: border-box;
+    }
+    textarea {
+      min-height: 70px;
+      resize: vertical;
     }
     button {
       width: 100%;
@@ -77,10 +87,12 @@
       color: white;
       cursor: pointer;
     }
-    #logoutBtn {
-      background: #b00020;
-      width: 100%;
-      margin-top: 10px;
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .btn-danger {
+      background: #b00020 !important;
     }
     .summary-grid {
       display: grid;
@@ -150,8 +162,6 @@
       color: #666;
       margin-top: 10px;
     }
-
-    /* ===== Premium Enhancements (A+B) ===== */
     .welcome {
       font-size: 0.9rem;
       color: #444;
@@ -169,22 +179,59 @@
       width: 0%;
       background: linear-gradient(90deg, #f7e6b5, #ffffff);
     }
+    .pill {
+      display:inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background:#eef6f2;
+      color:#0c5b3b;
+      margin-left: 6px;
+    }
+    .divider {
+      height: 1px;
+      background: #eee;
+      margin: 10px 0;
+    }
+    .left { text-align:left; }
+    .guar-item {
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 10px;
+      margin: 10px 0;
+      box-shadow: none;
+      background: #fff;
+    }
+    .row2 {
+      display:flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .row2 button {
+      width: 100%;
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 0.9rem;
+    }
+    .btn-approve { background: #0c5b3b !important; }
+    .btn-decline { background: #b00020 !important; }
   </style>
 </head>
 
 <body>
   <div class="header">
-    <!-- Put any logo image URL you want here (optional). If it doesn't load, no crash. -->
     <img class="logo" alt="Prime Nova Logo" src="icon-192.png" />
     <h1>Prime Nova</h1>
     <h2>Member Dashboard</h2>
   </div>
 
-  <div class="card">
+  <!-- LOGIN CARD -->
+  <div class="card" id="loginCard">
     <label for="memberId">Membership ID</label>
     <input id="memberId" placeholder="e.g. PN-0001" />
 
-    <label for="password">Password</label>
+    <label for="password">Password / PIN</label>
     <input id="password" type="password" placeholder="Enter your password" />
 
     <button id="viewBtn">View My Summary</button>
@@ -192,15 +239,20 @@
     <div class="small">If you don’t have your ID/Password, contact the Secretariat.</div>
   </div>
 
+  <!-- RESULT AREA -->
   <div id="result" style="display:none">
+
+    <!-- MEMBER IDENTITY -->
     <div class="card">
       <div class="welcome">Welcome 👋</div>
       <strong id="name"></strong><br>
       <div class="small">
         ID: <span id="idDisplay"></span> • <span id="category"></span>
+        <span class="pill" id="statusPill" style="display:none">Active</span>
       </div>
     </div>
 
+    <!-- FINANCIAL SUMMARY -->
     <div class="card">
       <div class="summary-grid">
         <div class="summary-item">
@@ -227,6 +279,7 @@
       </div>
     </div>
 
+    <!-- STATUS -->
     <div class="card">
       <div class="status-row">
         <div class="status-card">
@@ -254,14 +307,80 @@
         Last updated: <span id="lastUpdated"></span>
       </div>
 
-      <button id="logoutBtn">Logout</button>
+      <button id="logoutBtn" class="btn-danger">Logout</button>
     </div>
+
+    <!-- LOAN APPLICATION -->
+    <div class="card">
+      <h3>Apply for a Loan <span class="pill">9% p.a (prorated)</span></h3>
+
+      <label>Amount Requested (₦)</label>
+      <input id="loanAmount" type="number" inputmode="numeric" placeholder="e.g. 200000" />
+
+      <label>Tenure (Months) — Max 18 months</label>
+      <select id="loanTenure">
+        <option value="1">1 Month</option>
+        <option value="3">3 Months</option>
+        <option value="6">6 Months</option>
+        <option value="9">9 Months</option>
+        <option value="12">12 Months</option>
+        <option value="15">15 Months</option>
+        <option value="18">18 Months</option>
+      </select>
+
+      <label>Purpose</label>
+      <input id="loanPurpose" placeholder="e.g. Business support" />
+
+      <div class="divider"></div>
+
+      <label>Guarantor 1 (Member ID)</label>
+      <input id="g1" placeholder="e.g. PN-0021" />
+
+      <label>Guarantor 2 (Member ID)</label>
+      <input id="g2" placeholder="e.g. PN-0040" />
+
+      <div class="divider"></div>
+
+      <div class="left" style="font-size:0.88rem;color:#333;">
+        <strong>Repayment Summary:</strong><br>
+        Interest: <span id="calcInterest">—</span><br>
+        Total Repayable: <span id="calcTotal">—</span><br>
+        Monthly Repayment: <span id="calcMonthly">—</span>
+      </div>
+
+      <label style="display:flex;gap:8px;align-items:flex-start;margin-top:10px;">
+        <input id="termsChk" type="checkbox" style="width:auto;margin-top:3px;" />
+        <span style="font-size:0.82rem;color:#555;">
+          I agree that loan approval is subject to cooperative policy and funds availability.
+          I authorize verification of records and guarantor contact.
+        </span>
+      </label>
+
+      <button id="submitLoanBtn" style="margin-top:10px;">Submit Loan Application</button>
+      <div id="loanMsg" class="small left" style="margin-top:8px;"></div>
+    </div>
+
+    <!-- GUARANTOR REQUESTS -->
+    <div class="card">
+      <h3>Guarantor Requests</h3>
+      <div id="guarantorList" class="small left">Loading requests...</div>
+    </div>
+
   </div>
 
   <script>
-    // ✅ Your published Dashboard CSV link
+    // ====== CONFIG ======
+    // Your published Dashboard CSV link (read-only display)
     const CSV_URL =
       "https://docs.google.com/spreadsheets/d/e/2PACX-1vRr9k9ClkLjP2X6qaZxsjEWVgBAWWKFS5g5gFmwtN9-nP-NUEYMtWhRiu7Qm4uyweot1-GQm43JYqy0/pub?gid=1139815476&single=true&output=csv";
+
+    // Your Apps Script Web App (read/write for loans + guarantor actions)
+    const APPS_SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycbybzqHil3QZx73skfnQWqhEuQvzEBJyr1zlGPpJaILEct9uXJpNPiB5eXhDNCXCTQU/exec";
+
+    // Keep logged session (in-memory)
+    window.__loggedMemberId = null;
+    window.__loggedPassword = null;
 
     function formatNaira(value) {
       const n = Number(String(value || "0").replace(/[^0-9.\-]/g, "")) || 0;
@@ -334,6 +453,165 @@
       if (el) el.style.width = percent + "%";
     }
 
+    // ====== LOAN CALC + API ======
+    function calcLoan(P, months) {
+      const r = 0.09; // 9% p.a
+      const interest = +(P * r * (months/12)).toFixed(2);
+      const total = +(P + interest).toFixed(2);
+      const monthly = +(total / months).toFixed(2);
+      return { interest, total, monthly };
+    }
+
+    async function apiPost(payload) {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
+      });
+      return res.json();
+    }
+
+    function wireLoanUI() {
+      const amt = document.getElementById("loanAmount");
+      const ten = document.getElementById("loanTenure");
+      const iEl = document.getElementById("calcInterest");
+      const tEl = document.getElementById("calcTotal");
+      const mEl = document.getElementById("calcMonthly");
+      const msg = document.getElementById("loanMsg");
+      const btn = document.getElementById("submitLoanBtn");
+
+      function refresh() {
+        const P = Number(amt?.value || 0);
+        const months = Number(ten?.value || 1);
+        if (!(P > 0)) { iEl.textContent="—"; tEl.textContent="—"; mEl.textContent="—"; return; }
+        const c = calcLoan(P, months);
+        iEl.textContent = formatNaira(c.interest);
+        tEl.textContent = formatNaira(c.total);
+        mEl.textContent = formatNaira(c.monthly);
+      }
+
+      amt?.addEventListener("input", refresh);
+      ten?.addEventListener("change", refresh);
+      refresh();
+
+      btn?.addEventListener("click", async () => {
+        msg.textContent = "";
+
+        const memberId = window.__loggedMemberId;
+        const password = window.__loggedPassword;
+
+        const P = Number(document.getElementById("loanAmount").value || 0);
+        const months = Number(document.getElementById("loanTenure").value || 1);
+        const purpose = (document.getElementById("loanPurpose").value || "").trim();
+        const g1 = (document.getElementById("g1").value || "").trim();
+        const g2 = (document.getElementById("g2").value || "").trim();
+        const terms = document.getElementById("termsChk").checked;
+
+        if (!terms) { msg.textContent = "Please accept the terms to proceed."; return; }
+        if (!(P > 0)) { msg.textContent = "Enter a valid amount."; return; }
+        if (!g1 || !g2) { msg.textContent = "Please enter two guarantor Member IDs."; return; }
+
+        btn.disabled = true;
+        btn.textContent = "Submitting...";
+        msg.textContent = "Submitting your loan request...";
+
+        try {
+          const data = await apiPost({
+            action: "applyLoan",
+            member_id: memberId,
+            password,
+            amount: P,
+            tenure_months: months,
+            purpose,
+            g1, g2
+          });
+
+          if (!data.ok) {
+            msg.textContent = data.error || "Failed to submit.";
+            return;
+          }
+
+          msg.textContent =
+            `Submitted successfully (Ref: ${data.application_id}). Total repayable: ${formatNaira(data.total_repayable)}. Monthly: ${formatNaira(data.monthly_repayment)}.`;
+
+          // Optionally refresh guarantor requests (in case member is also guarantor)
+          await loadGuarantorRequests(memberId, password);
+
+        } catch (e) {
+          console.error(e);
+          msg.textContent = "Network error submitting request. Please try again.";
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "Submit Loan Application";
+        }
+      });
+    }
+
+    async function loadGuarantorRequests(memberId, password) {
+      const box = document.getElementById("guarantorList");
+      if (!box) return;
+
+      box.textContent = "Loading requests...";
+
+      try {
+        const data = await apiPost({ action:"getGuarantorRequests", member_id:memberId, password });
+
+        if (!data.ok) {
+          box.textContent = "Unable to load guarantor requests.";
+          return;
+        }
+
+        if (!data.pending || data.pending.length === 0) {
+          box.textContent = "No pending requests.";
+          return;
+        }
+
+        box.innerHTML = data.pending.map(req => `
+          <div class="guar-item">
+            <div><strong>Borrower:</strong> ${req.borrower_name} (${req.borrower_member_id})</div>
+            <div><strong>Amount:</strong> ₦${Number(req.amount_requested).toLocaleString()}</div>
+            <div><strong>Tenure:</strong> ${req.tenure_months} month(s)</div>
+            <div><strong>Monthly:</strong> ₦${Number(req.monthly_repayment).toLocaleString()}</div>
+            <div class="row2">
+              <button class="btn-approve" onclick="decide('${req.application_id}','approve')">Approve</button>
+              <button class="btn-decline" onclick="decide('${req.application_id}','decline')">Decline</button>
+            </div>
+            <div id="msg-${req.application_id}" class="small left" style="margin-top:6px;"></div>
+          </div>
+        `).join("");
+
+      } catch (e) {
+        console.error(e);
+        box.textContent = "Error loading requests. Please try again.";
+      }
+    }
+
+    async function decide(appId, decision) {
+      const memberId = window.__loggedMemberId;
+      const password = window.__loggedPassword;
+      const msg = document.getElementById(`msg-${appId}`);
+      if (msg) msg.textContent = "Submitting...";
+
+      try {
+        const data = await apiPost({
+          action: "guarantorDecision",
+          member_id: memberId,
+          password,
+          application_id: appId,
+          decision
+        });
+
+        if (msg) msg.textContent = data.ok ? data.message : (data.error || "Failed");
+
+        // Refresh list after action
+        await loadGuarantorRequests(memberId, password);
+      } catch (e) {
+        console.error(e);
+        if (msg) msg.textContent = "Network error. Try again.";
+      }
+    }
+
+    // ====== LOGIN / VIEW ======
     async function handleView() {
       const memberInput = document.getElementById("memberId");
       const passInput = document.getElementById("password");
@@ -369,6 +647,10 @@
           return;
         }
 
+        // Persist session (in-memory)
+        window.__loggedMemberId = match.member_id;
+        window.__loggedPassword = password;
+
         // Basic info
         setText("name", match.full_name || "");
         setText("category", match.membership_category || "");
@@ -403,14 +685,14 @@
         const savingsNum = Number(String(match.total_savings || "0").replace(/[^0-9]/g, "")) || 0;
         const shareNum = Number(String(match.total_share_capital || "0").replace(/[^0-9]/g, "")) || 0;
 
-        // Simple progress targets (edit later as your policy evolves)
+        // Targets (edit anytime)
         const savingsTarget = 500000;    // ₦500,000
         const shareTarget = 1000000;     // ₦1,000,000
 
         setWidth("savingsBar", Math.min(100, (savingsNum / savingsTarget) * 100));
         setWidth("shareBar", Math.min(100, (shareNum / shareTarget) * 100));
 
-        // Next Action guidance (simple logic)
+        // Next Action guidance
         let next = "Keep saving consistently.";
         const elig = (match.loan_eligibility_status || "").toLowerCase();
         const app = (match.loan_application_status || "").toLowerCase();
@@ -419,7 +701,13 @@
         else if (app.includes("pending")) next = "Loan application is pending review.";
         setText("nextAction", next);
 
+        // Show
         result.style.display = "block";
+
+        // Wire loan UI + load guarantor requests
+        wireLoanUI();
+        await loadGuarantorRequests(match.member_id, password);
+
       } catch (e) {
         console.error(e);
         errorEl.textContent = "Error loading data. Please try again later.";
@@ -430,16 +718,16 @@
     }
 
     function handleLogout() {
-      const memberInput = document.getElementById("memberId");
-      const passInput = document.getElementById("password");
-      const result = document.getElementById("result");
-      const errorEl = document.getElementById("error");
+      window.__loggedMemberId = null;
+      window.__loggedPassword = null;
 
-      memberInput.value = "";
-      passInput.value = "";
-      result.style.display = "none";
-      errorEl.textContent = "";
-      memberInput.focus();
+      document.getElementById("memberId").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("result").style.display = "none";
+      document.getElementById("error").textContent = "";
+      const g = document.getElementById("guarantorList");
+      if (g) g.textContent = "";
+      document.getElementById("memberId").focus();
     }
 
     document.getElementById("viewBtn").addEventListener("click", handleView);
